@@ -1,0 +1,20 @@
+# Build artifacts
+*.exe
+*.test
+*.out
+coverage.out
+cov.out
+
+# Local cookie / token files (FileTokenStore)
+*.token.json
+twitterapiio.token.*
+token.txt
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+
+# OS junk
+.DS_Store
+Thumbs.db

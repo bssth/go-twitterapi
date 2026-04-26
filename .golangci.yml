@@ -1,0 +1,44 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - misspell
+    - revive
+    - gosec
+    - bodyclose
+    - unconvert
+  settings:
+    revive:
+      rules:
+        - name: var-naming
+        - name: package-comments
+        - name: indent-error-flow
+        - name: range
+        - name: superfluous-else
+        - name: unreachable-code
+    gosec:
+      excludes:
+        - G404
+  exclusions:
+    paths:
+      - examples
+      - references
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 10
