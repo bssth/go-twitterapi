@@ -355,17 +355,14 @@ func (s *TweetsService) ReplyChainToRoot(ctx context.Context, start Tweet, opts 
 	chain := make([]Tweet, 0, 16)
 	cur := start
 	seen := map[string]bool{}
-	for {
-		if cur.ID == "" || seen[cur.ID] {
-			break
-		}
+	for cur.ID != "" && !seen[cur.ID] {
 		seen[cur.ID] = true
 		chain = append(chain, cur)
 
-		if cur.InReplyToId == "" || (cur.ConversationId != "" && cur.ID == cur.ConversationId) {
+		if cur.InReplyToID == "" || (cur.ConversationID != "" && cur.ID == cur.ConversationID) {
 			break
 		}
-		parentID := cur.InReplyToId
+		parentID := cur.InReplyToID
 		if p, ok := all[parentID]; ok {
 			cur = p
 			continue

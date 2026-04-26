@@ -28,11 +28,19 @@ linters:
         - name: unreachable-code
     gosec:
       excludes:
+        # G404: math/rand is fine for retry jitter; no crypto needed.
         - G404
   exclusions:
     paths:
-      - examples
-      - references
+      - '^examples/'
+      - '^references/'
+    rules:
+      - path: '^examples/'
+        linters:
+          - typecheck
+      - path: '^references/'
+        linters:
+          - typecheck
 
 formatters:
   enable:

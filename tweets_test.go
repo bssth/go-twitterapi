@@ -150,7 +150,7 @@ func TestTweetsService_ReplyChainToRoot(t *testing.T) {
 			t.Fatalf("unexpected path %s", r.URL.Path)
 		}
 	})
-	start := Tweet{ID: "C", IsReply: true, InReplyToId: "B"}
+	start := Tweet{ID: "C", IsReply: true, InReplyToID: "B"}
 	chain, err := c.Tweets.ReplyChainToRoot(context.Background(), start, nil)
 	if err != nil {
 		t.Fatal(err)

@@ -46,12 +46,12 @@ type Tweet struct {
 	BookmarkCount int64 `json:"bookmarkCount,omitempty"`
 
 	IsReply        bool   `json:"isReply,omitempty"`
-	InReplyToId    string `json:"inReplyToId,omitempty"`
-	ConversationId string `json:"conversationId,omitempty"`
+	InReplyToID    string `json:"inReplyToId,omitempty"`
+	ConversationID string `json:"conversationId,omitempty"`
 
 	DisplayTextRange []int `json:"displayTextRange,omitempty"`
 
-	InReplyToUserId   string `json:"inReplyToUserId,omitempty"`
+	InReplyToUserID   string `json:"inReplyToUserId,omitempty"`
 	InReplyToUsername string `json:"inReplyToUsername,omitempty"`
 
 	Author   User          `json:"author"`

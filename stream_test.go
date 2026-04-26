@@ -2,6 +2,7 @@ package twitterapi
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -15,7 +16,7 @@ import (
 func TestWSClient_RequiresAPIKey(t *testing.T) {
 	w := &WSClient{}
 	err := w.ConnectAndRead(context.Background(), nil)
-	if err != ErrMissingAPIKey {
+	if !errors.Is(err, ErrMissingAPIKey) {
 		t.Fatalf("got %v", err)
 	}
 }
@@ -26,7 +27,7 @@ func TestWSClient_ReadsAndReconnects(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("x-api-key") != "k" {
-			http.Error(w, "no key", 401)
+			http.Error(w, "no key", http.StatusUnauthorized)
 			return
 		}
 		conn, err := upgrader.Upgrade(w, r, nil)

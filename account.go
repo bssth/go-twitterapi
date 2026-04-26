@@ -172,7 +172,7 @@ func (c *Client) rawGet(ctx context.Context, path string, q url.Values) (json.Ra
 	if err != nil {
 		return nil, err
 	}
-	_, body, err := c.do(ctx, req)
+	body, err := c.do(ctx, req)
 	if err != nil {
 		return body, err
 	}
@@ -191,7 +191,7 @@ func (c *Client) rawPost(ctx context.Context, path string, payload any) (json.Ra
 	if err != nil {
 		return nil, err
 	}
-	_, body, err := c.do(ctx, req)
+	body, err := c.do(ctx, req)
 	if err != nil {
 		return body, err
 	}

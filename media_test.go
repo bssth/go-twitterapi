@@ -18,7 +18,7 @@ func TestMediaService_Upload_Multipart(t *testing.T) {
 		if !strings.HasPrefix(ct, "multipart/form-data") {
 			t.Fatalf("ct=%q", ct)
 		}
-		if err := r.ParseMultipartForm(8 << 20); err != nil {
+		if err := r.ParseMultipartForm(8 << 20); err != nil { // #nosec G120 -- test code
 			t.Fatal(err)
 		}
 		if got := r.MultipartForm.Value["login_cookies"]; len(got) == 0 || got[0] != "C" {
@@ -32,7 +32,7 @@ func TestMediaService_Upload_Multipart(t *testing.T) {
 			t.Fatal("file part missing")
 		}
 		f, _ := fhs[0].Open()
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 		body, _ := io.ReadAll(f)
 		if string(body) != "PNGDATA" {
 			t.Errorf("file body=%q", body)

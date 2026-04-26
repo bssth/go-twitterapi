@@ -361,9 +361,13 @@ func (c *Client) newRequest(ctx context.Context, method, path string, q url.Valu
 	return req, nil
 }
 
-func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, []byte, error) {
+// do executes req with retry, throttle, and body close handling. It always
+// reads and closes resp.Body itself, so callers don't need to worry about
+// either. Errors of type *APIError preserve the response headers — they're
+// the only piece of the response a caller might want.
+func (c *Client) do(ctx context.Context, req *http.Request) ([]byte, error) {
 	if err := c.throttleIfNeeded(ctx); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// Snapshot body for retries.
@@ -373,7 +377,7 @@ func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, []b
 		bodyBytes, err = io.ReadAll(req.Body)
 		_ = req.Body.Close()
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 		req.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 		req.GetBody = func() (io.ReadCloser, error) {
@@ -385,27 +389,28 @@ func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, []b
 	for attempt := 0; attempt <= c.maxRetries; attempt++ {
 		if attempt > 0 {
 			if err := c.sleepBackoff(ctx, attempt, lastErr); err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 			if bodyBytes != nil {
 				req.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 			}
 		}
 
-		resp, err := c.httpClient.Do(req)
+		// URL is built from a configured BaseURL + path constants — not user-tainted.
+		resp, err := c.httpClient.Do(req) // #nosec G107,G704
 		if err != nil {
 			lastErr = err
 			if isRetryableNetErr(err) && attempt < c.maxRetries {
 				continue
 			}
-			return nil, nil, err
+			return nil, err
 		}
 
 		body, _ := io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
 
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-			return resp, body, nil
+			return body, nil
 		}
 
 		apiErr := newAPIError(resp, body)
@@ -414,9 +419,9 @@ func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, []b
 		if (resp.StatusCode == 429 || resp.StatusCode >= 500) && attempt < c.maxRetries {
 			continue
 		}
-		return resp, body, apiErr
+		return body, apiErr
 	}
-	return nil, nil, lastErr
+	return nil, lastErr
 }
 
 func (c *Client) sleepBackoff(ctx context.Context, attempt int, lastErr error) error {
@@ -434,7 +439,14 @@ func (c *Client) sleepBackoff(ctx context.Context, attempt int, lastErr error) e
 		}
 	}
 
-	backoff := c.minBackoff * time.Duration(1<<uint(attempt-1))
+	shift := attempt - 1
+	if shift < 0 {
+		shift = 0
+	}
+	if shift > 30 {
+		shift = 30 // cap to avoid time.Duration overflow on absurd retry counts
+	}
+	backoff := c.minBackoff * time.Duration(int64(1)<<uint(shift))
 	if backoff > c.maxBackoff {
 		backoff = c.maxBackoff
 	}
@@ -488,7 +500,7 @@ func (c *Client) getJSON(ctx context.Context, path string, q url.Values, out any
 	if err != nil {
 		return err
 	}
-	_, body, err := c.do(ctx, req)
+	body, err := c.do(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -504,7 +516,7 @@ func (c *Client) postJSON(ctx context.Context, path string, payload, out any) er
 	if err != nil {
 		return err
 	}
-	_, body, err := c.do(ctx, req)
+	body, err := c.do(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -520,7 +532,7 @@ func (c *Client) patchJSON(ctx context.Context, path string, payload, out any) e
 	if err != nil {
 		return err
 	}
-	_, body, err := c.do(ctx, req)
+	body, err := c.do(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -537,7 +549,7 @@ func (c *Client) deleteJSON(ctx context.Context, path string, payload, out any) 
 	if err != nil {
 		return err
 	}
-	_, body, err := c.do(ctx, req)
+	body, err := c.do(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -560,7 +572,7 @@ func (c *Client) postMultipart(ctx context.Context, method, path string, form mu
 	if err != nil {
 		return err
 	}
-	_, body, err := c.do(ctx, req)
+	body, err := c.do(ctx, req)
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,6 @@ package twitterapi
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -86,17 +85,6 @@ func muxOf(t *testing.T, routes ...jsonRoute) http.HandlerFunc {
 		t.Errorf("unexpected request: %s %s", r.Method, r.URL.Path)
 		http.Error(w, "no route", http.StatusNotFound)
 	}
-}
-
-// readBody slurps and trims the request body. Returns "" on error.
-func readBody(t *testing.T, r *http.Request) string {
-	t.Helper()
-	b, err := io.ReadAll(r.Body)
-	if err != nil {
-		t.Errorf("read body: %v", err)
-		return ""
-	}
-	return strings.TrimSpace(string(b))
 }
 
 // decodeBody unmarshals the request body into v.

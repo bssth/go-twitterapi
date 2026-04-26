@@ -90,7 +90,10 @@ func (w *WSClient) ConnectAndRead(ctx context.Context, onEvent func(WSEvent)) er
 		h.Set("x-api-key", w.APIKey)
 		h.Set("X-API-Key", w.APIKey)
 
-		conn, _, err := d.DialContext(ctx, u, h)
+		conn, resp, err := d.DialContext(ctx, u, h)
+		if resp != nil {
+			_ = resp.Body.Close()
+		}
 		if err != nil {
 			w.logf("dial: %v", err)
 			if waitErr := sleepCtx(ctx, delay); waitErr != nil {
@@ -111,7 +114,7 @@ func (w *WSClient) ConnectAndRead(ctx context.Context, onEvent func(WSEvent)) er
 }
 
 func (w *WSClient) readLoop(ctx context.Context, conn *websocket.Conn, onEvent func(WSEvent)) error {
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 	for {
 		select {
 		case <-ctx.Done():

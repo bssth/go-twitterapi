@@ -59,7 +59,7 @@ type User struct {
 	AffiliatesHighlightedLabel map[string]any `json:"affiliatesHighlightedLabel,omitempty"`
 
 	PossiblySensitive bool     `json:"possiblySensitive,omitempty"`
-	PinnedTweetIds    []string `json:"pinnedTweetIds,omitempty"`
+	PinnedTweetIDs    []string `json:"pinnedTweetIds,omitempty"`
 
 	IsAutomated bool   `json:"isAutomated,omitempty"`
 	AutomatedBy string `json:"automatedBy,omitempty"`
