@@ -4,6 +4,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/bssth/go-twitterapi.svg)](https://pkg.go.dev/github.com/bssth/go-twitterapi)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bssth/go-twitterapi)](https://goreportcard.com/report/github.com/bssth/go-twitterapi)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![MIU](https://img.shields.io/badge/made_in-Ukraine-ffd700?labelColor=0057b7)
 
 Idiomatic Go SDK for [twitterapi.io](https://docs.twitterapi.io/introduction) — a third-party gateway to the Twitter / X API. Read profiles, walk timelines, post tweets, send DMs, manage Communities and List members, register webhook filter rules, and tap the experimental WebSocket stream — all from one typed client.
 
